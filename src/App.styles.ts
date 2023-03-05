@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const Container = styled.div`
   width: 100%;
-  max-width: 750px;
+  max-width: 1000px;
   margin: 0 auto;
   display: flex;
   padding: 50px 0;
@@ -33,6 +33,15 @@ export const Container = styled.div`
     flex: 1;
     display: flex;
     justify-content: flex-end;
+    margin-left: 30px;
+
+    & .grid{
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+
+    }
   }
 
   @media (max-width: 750px) {
