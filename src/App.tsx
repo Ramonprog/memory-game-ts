@@ -12,13 +12,13 @@ const App = () => {
   const [playing, setPlaying] = useState<boolean>(false);
   const [timeElapsed, setTimeElapsed] = useState<number>(0);
   const [moveCount, setMoveCount] = useState<number>(0);
-  const [showCount, setShowCount] = useState<number>(0);
+  const [shownCount, setShownCount] = useState<number>(0);
   const [gridItems, setGridItems] = useState<GridItemType[]>([]);
 
   const reset = () => {
     setTimeElapsed(0);
     setMoveCount(0);
-    setShowCount(0);
+    setShownCount(0);
   };
 
   const createGrid = () => {
@@ -54,19 +54,74 @@ const App = () => {
     createGrid();
   };
 
-  const handleItemClick = (index: number) => {};
+  const handleItemClick = (index: number) => {
+    if (playing && index !== null && shownCount < 2) {
+      let tempGrid = [...gridItems];
+      if (
+        tempGrid[index].permanentShown === false &&
+        tempGrid[index].shown === false
+      ) {
+        tempGrid[index].shown = true;
+        console.log(tempGrid[index]);
+        setShownCount((prev) => prev + 1);
+      }
+
+      setGridItems(tempGrid);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
       if (playing) {
-        setTimeElapsed((prev) => prev + 1);
+        setTimeElapsed(timeElapsed + 1);
       }
     }, 1000);
 
     return () => clearInterval(timer);
   }, [playing, timeElapsed]);
 
-  useEffect(() => resetAndCreateGrid(), []);
+  useEffect(() => {
+    resetAndCreateGrid();
+  }, []);
+
+  useEffect(() => {
+    if (shownCount === 2) {
+      setMoveCount((prev) => prev + 1);
+      let opned = gridItems.filter((item) => item.shown === true);
+      let tmpGrid = [...gridItems];
+      if (opned.length === 2) {
+        if (opned[0].item === opned[1].item) {
+          for (let i in tmpGrid) {
+            if (tmpGrid[i].shown) {
+              tmpGrid[i].permanentShown = true;
+              tmpGrid[i].shown = false;
+            }
+          }
+          setGridItems(tmpGrid);
+          setShownCount(0);
+        } else {
+          for (let i in tmpGrid) {
+            if (tmpGrid[i].shown) {
+              setTimeout(() => {
+                tmpGrid[i].shown = false;
+              }, 800);
+            }
+          }
+          setGridItems(tmpGrid);
+          setShownCount(0);
+        }
+      }
+    }
+  }, [shownCount, gridItems]);
+
+  useEffect(() => {
+    if (
+      moveCount > 0 &&
+      gridItems.every((item) => item.permanentShown === true)
+    ) {
+      setPlaying(false);
+    }
+  }, [moveCount]);
 
   return (
     <C.Container>
@@ -80,7 +135,7 @@ const App = () => {
         </div>
         <div className="info-area">
           <InfoItem label="Tempo" value={formatTime(timeElapsed)} />
-          <InfoItem label="Movimentos" value="0" />
+          <InfoItem label="Movimentos" value={moveCount.toString()} />
         </div>
 
         <Button
